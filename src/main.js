@@ -1,19 +1,40 @@
 import { requestData } from "./js/pixabay-api";
-import { list, renderGallery } from "./js/render-function";
+import { list, renderGallery, buttonLoad, hideButton } from "./js/render-function";
 
 const refs = {
     form: document.querySelector('.form'),
 }
 const { form } = refs;
 
+hideButton();
+
+let pageNumber = 1;
+let inputData;
 
 form.addEventListener('submit', (evt) => {
     evt.preventDefault();
+    pageNumber = 1;
     list.innerHTML = "";
-    const inputData = form.elements.image.value.trim();
+    inputData = form.elements.image.value.trim();
+    hideButton();
     if (inputData === "") {
         return;
     }
-    requestData(inputData).then(value => renderGallery(value));
+    showGallery();
     form.reset();
 })
+
+buttonLoad.addEventListener('click', () => {
+    pageNumber += 1;
+    showGallery();
+    
+})
+
+async function showGallery() {
+     try {
+        const response = await requestData(inputData, pageNumber);
+        renderGallery(response, pageNumber);
+    } catch (err) {
+        console.error(err);
+    }
+}

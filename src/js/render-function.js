@@ -2,11 +2,13 @@ import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
 import iziToast from "izitoast";
 import "izitoast/dist/css/iziToast.min.css";
+import { itemsPerPage } from "./pixabay-api";
 
 export const list = document.querySelector('.gallery');
+export const buttonLoad = document.querySelector('.load-button');
 
-export const renderGallery = (value) => {
-    if (value.hits.length === 0) {
+export const renderGallery = (response, pageNumber) => {
+    if (response.hits.length === 0) {
         iziToast.error({
             title: 'Sorry, there are no images matching',
             titleColor: '#fafafb',
@@ -22,8 +24,8 @@ export const renderGallery = (value) => {
             maxWidth: '432px',
         });
     }
-    const imageMarkUp = value.hits.map((hit) => {
-        const { largeImageURL, webformatURL, tags, likes, views, comments, downloads } = hit;
+    const imageMarkUp = response.hits.map((hit) => {
+        const { largeImageURL, webformatURL, tags, likes, views, comments, downloads } = hit; 
         const uniqTags = tags.split(', ').filter((el, index, arr) => arr.indexOf(el) === index).join(', ');
         return `<li class="gallery-item">
                     <a class="gallery-link" href="${largeImageURL}">
@@ -44,6 +46,29 @@ export const renderGallery = (value) => {
 
     list.insertAdjacentHTML("beforeend", imageMarkUp);
     bigImage.refresh();
+    showButton(response, pageNumber);
+}
+
+function showButton(response, pageNumber) {
+    if (checkPage(response, pageNumber)) {
+        buttonLoad.classList.remove('visually-hidden');
+    }
+}
+export function hideButton() {
+    buttonLoad.classList.add('visually-hidden');
+}
+
+function checkPage(response, pageNumber) {
+    let totalPages = Math.ceil(response.totalHits / itemsPerPage);
+    if (pageNumber >= totalPages) {
+        hideButton();
+        iziToast.error({
+            position: "topRight",
+            message: "We're sorry, but you've reached the end of search results."
+        });
+        return false;
+    }
+    return true;
 }
 
 let bigImage = new SimpleLightbox('.gallery-item a', { captionsData: 'alt', captionDelay: 250 });
