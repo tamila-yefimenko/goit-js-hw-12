@@ -24,10 +24,10 @@ form.addEventListener('submit', (evt) => {
     form.reset();
 })
 
-buttonLoad.addEventListener('click', () => {
+buttonLoad.addEventListener('click', async () => {
     pageNumber += 1;
-    showGallery();
-    
+    await showGallery();
+    scrollPage();
 })
 
 async function showGallery() {
@@ -37,4 +37,14 @@ async function showGallery() {
     } catch (err) {
         console.error(err);
     }
+}
+
+function scrollPage() {
+    const info = list.firstElementChild.getBoundingClientRect();
+    const height = info.height;
+    const gap = Number.parseInt(getComputedStyle(list).getPropertyValue('gap'));
+    scrollBy({
+        behavior: 'smooth',
+        top: (height + gap) * 2,
+    })
 }

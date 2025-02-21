@@ -3,6 +3,7 @@ import "simplelightbox/dist/simple-lightbox.min.css";
 import iziToast from "izitoast";
 import "izitoast/dist/css/iziToast.min.css";
 import { itemsPerPage } from "./pixabay-api";
+import iconPath from "../img/icon.svg"
 
 export const list = document.querySelector('.gallery');
 export const buttonLoad = document.querySelector('.load-button');
@@ -14,6 +15,7 @@ export const renderGallery = (response, pageNumber) => {
             titleColor: '#fafafb',
             titleSize: '16px',
             titleLineHeight: '1.5',
+            iconUrl: iconPath,
             message: 'your search query.Please try again!',
             messageColor: '#fafafb',
             messageSize: '16px',
@@ -46,13 +48,13 @@ export const renderGallery = (response, pageNumber) => {
 
     list.insertAdjacentHTML("beforeend", imageMarkUp);
     bigImage.refresh();
-    showButton(response, pageNumber);
+    
+    checkPage(response, pageNumber);
 }
 
-function showButton(response, pageNumber) {
-    if (checkPage(response, pageNumber)) {
+function showButton() {
         buttonLoad.classList.remove('visually-hidden');
-    }
+    
 }
 export function hideButton() {
     buttonLoad.classList.add('visually-hidden');
@@ -60,15 +62,23 @@ export function hideButton() {
 
 function checkPage(response, pageNumber) {
     let totalPages = Math.ceil(response.totalHits / itemsPerPage);
+    if (response.hits.length === 0) {
+        return;
+    }
     if (pageNumber >= totalPages) {
         hideButton();
-        iziToast.error({
+        iziToast.info({
             position: "topRight",
-            message: "We're sorry, but you've reached the end of search results."
+            message: "We're sorry, but you've reached the end of search results.",
+            messageColor: '#fafafb',
+            messageSize: '16px',
+            messageLineHeight: '1.5',
+            backgroundColor: '#6c8cff',
+            theme: 'dark',
         });
-        return false;
+    } else {
+        showButton();
     }
-    return true;
 }
 
 let bigImage = new SimpleLightbox('.gallery-item a', { captionsData: 'alt', captionDelay: 250 });
